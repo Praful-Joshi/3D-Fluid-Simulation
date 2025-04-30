@@ -51,7 +51,7 @@ Shader::Shader(const char *filename,ShaderType type) {
 			ShaderID=glCreateShader(GL_COMPUTE_SHADER);
 			break;
 	}
-	shaderSource="#version 430\n"+shaderSource;
+	shaderSource="#version 420\n"+shaderSource;
 
 	// Compile shader
 	const char* rawShaderSource = shaderSource.c_str();
