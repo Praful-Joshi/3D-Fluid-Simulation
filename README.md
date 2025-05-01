@@ -1,65 +1,112 @@
-# SPH Fluid Simulator (C++ / OpenGL)
-**An interactive fluid program based on Smoothed Particle Hydrodynamics.**
+# Ray Traced Fluid Simulation using CUDA and OpenGL
 
-![Github Stars](https://img.shields.io/github/stars/lijenicol/SPH-Fluid-Simulator?style=flat)
-![GitHub forks](https://img.shields.io/github/forks/lijenicol/SPH-Fluid-Simulator?style=flat)
-![GitHub issues](https://img.shields.io/github/issues/lijenicol/SPH-Fluid-Simulator?style=flat)
-![GitHub](https://img.shields.io/github/license/lijenicol/SPH-Fluid-Simulator)
+This project is a real-time Smoothed Particle Hydrodynamics (SPH) fluid simulator implemented in C++ using OpenGL and accelerated with CUDA. It builds upon an existing CPU-only implementation and introduces GPU parallelism to significantly improve performance.
 
-Smoothed Particle Hydrodynamics (SPH) is a method that can be used to approximate solutions to the Navier-Stokes equations which describe the motion of fluid substances. It is a powerful technique which has its applications in fields such as fluid dynamics and astrophysics. This is my C++/OpenGL implementation of it.
+It also includes a custom CPU-based ray tracer for photorealistic offline rendering of SPH particles.
 
-This project started out as a college project, however, I have since added to it so that people can use it as a reference for their own projects. I found that there wasn't too much documentation on implementing this in C++, which caused much of a headache when I couldn't get it working the day the project was due. I hope in making all of this code accessible on GitHub, that it will be able to help someone out who is in a similar situation.
+---
 
-## Video demo:
+## ✨ Features
 
-[![SPH Demo](https://img.youtube.com/vi/FRoIgCHV93U/0.jpg)](https://www.youtube.com/watch?v=FRoIgCHV93U)
+- CUDA-parallelized SPH simulation
+- Multithreaded CPU fallback mode
+- Real-time interactive OpenGL rendering
+- Offline CPU-based ray traced rendering
+- Adjustable fluid simulation parameters (e.g., viscosity, pressure)
+- Modular architecture for easy extension
 
-## Referencing The Code:
+---
 
-The source code for all of the interesting SPH maths/physics can be found in `src/SPHSystem.cpp`. That file includes all of the code which calculates the densities/forces/positions of particles and that is where the main `update()` method is.
+## 📊 Performance
 
-## Neighborhood Search
+Tested on a system with an NVIDIA GTX 1650 GPU and 8-core CPU:
 
-A core part of the SPH algorithm is calculating properties of particles based off properties of other close particles. This means that we need to determine which particles are "close" to another, which can be computationally expensive. 
+| Particles | CPU Time (ms) | GPU Time (ms) | Speedup |
+|-----------|----------------|----------------|---------|
+| 1,500     | 20.6           | 15.3           | 1.34×   |
+| 10,000    | 35.8           | 17.9           | 2.00×   |
+| 60,000    | 150.3          | 18.6           | 8.08×   |
 
-The naive solution is the "brute force" approach, which is: `for every particle, loop through every other particle, and if both particles are within a certain distance, mark them as "close"`. This is a classic case of an `O(n^2)` algorithm, an algorithm which doesn't scale well when more particles are added.
+The GPU version maintains real-time responsiveness (>60 FPS) even at 60,000 particles.
 
-Because the distance at which we mark particles "close" is a constant (called `h`), we can use another technique called **Spatial Hashing**. This technique divides the 3D environment into a grid, where the length of each cubic cell is equal to `h`. For each particle, we determine the cell that it is in (on the grid we created) and then hash the cell - we use that hash to place the particle inside a "particle table" whose key is the hash (to handle hash collisions, there is a linked list for each table value). Once the particle table is built, we can then use it to determine which particles are "close" to another. For more info, check out the articles listed in the section **More information on SPH**.
+---
 
-## Multithreading
+## 🔧 Build Instructions (Ubuntu/Linux)
 
-If you have seen my video on YouTube, you may notice that this program was rather slow - this was due to the fact that it was running only one thread. Since the release of the video, I have improved the performance dramatically by allowing this program to run on more than one thread, which means that the forces/positions of particles can be calculated concurrently, reducing the execution time of the `update()` method. To further increase performance, this is something that a GPU would crush as GPUs have a lot more cores which can increase the amount of calculations which can be done in parallel.
+### Step 1: Set GCC/G++ version to 10
 
-## More Information on SPH ##
-
-These two papers helped out a lot in my journey:
-
-- **SPH Fluids in Computer Graphics**, *State of The Art Report* <br>https://cg.informatik.uni-freiburg.de/publications/2014_EG_SPH_STAR.pdf
-- **Particle-Based Fluid Simulation for Interactive Applications** <br>https://matthias-research.github.io/pages/publications/sca03.pdf
-
-## Dependencies:
-
-To build the `sph` executable, there are a few dependencies which are required. These dependencies are:
-
-- GLUT / freeglut
-- GLEW
-- GLM
-- CMake >= 3.13.0
-
-## Building:
-
-This project relies on CMake to generate build files. Once the dependencies are installed, running CMake at the root of this repository will generate the build files necessary to craft the `sph` executable.
-
-Example of building in Linux:
-
+```bash
+sudo apt install gcc-10 g++-10
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100
+sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+sudo update-alternatives --config gcc
+sudo update-alternatives --config g++
 ```
-cmake -Bbuild
-cd build
-make
+Select `gcc-10` and `g++-10` in the prompt.
+
+---
+
+### Step 2: Clean previous builds
+
+```bash
+rm -rf build
 ```
 
-Once built, simply run the command below to start the program:
+---
 
+### Step 3: Set environment variables for CUDA
+
+```bash
+export CC=/usr/bin/gcc-10
+export CXX=/usr/bin/g++-10
+export CUDAHOSTCXX=/usr/bin/g++-10
 ```
-./sph
+
+---
+
+### Step 4: Configure with CMake
+
+```bash
+cmake -Bbuild \
+  -DCMAKE_C_COMPILER=gcc-10 \
+  -DCMAKE_CXX_COMPILER=g++-10 \
+  -DCMAKE_CUDA_HOST_COMPILER=/usr/bin/g++-10
 ```
+
+---
+
+### Step 5: Build
+
+```bash
+cmake --build build -j$(nproc)
+```
+
+---
+
+## 📂 Project Structure
+
+- `src/` – Core SPH simulation logic (CPU and CUDA)
+- `include/` – Data structures, constants, and kernel headers
+- `resources/` – Mesh and shader assets
+- `build/` – CMake-generated binaries
+- `main.cpp` – Entry point and renderer
+
+---
+
+## 📸 Screenshots
+
+| CPU Ray Traced | GPU Real-time |
+|----------------|----------------|
+| ![CPU](./cpu.png) | ![GPU](./gpu.png) |
+
+---
+
+## 📚 Acknowledgments
+
+Special thanks to the original authors and developers of the CPU SPH implementation for their foundational work, and to Professor Jiajia Li and the Parallel Systems course instructors at NC State for their guidance and support.
+
+---
+
+## 📝 License
+
+This project is for educational and academic use. Licensing terms may vary based on third-party library dependencies (e.g., glm, OpenGL, CUDA).
