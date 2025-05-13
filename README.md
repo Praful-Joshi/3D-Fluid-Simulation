@@ -1,10 +1,12 @@
-# Ray Traced Fluid Simulation using CUDA and OpenGL
+# SPH Fluid Solver Parallelized using CUDA
 
 **[→ View Project Repository](https://github.com/Praful-Joshi/Fluid-Simulation/tree/master)**
 
 This project is a real-time Smoothed Particle Hydrodynamics (SPH) fluid simulator implemented in C++ using OpenGL and accelerated with CUDA. It builds upon an existing CPU-only implementation and introduces GPU parallelism to significantly improve performance.
 
-It also includes a custom CPU-based ray tracer for photorealistic offline rendering of SPH particles.
+<p align="center">
+  <img src="preview.gif" alt="Gameplay Preview" />
+</p>
 
 ---
 
@@ -13,7 +15,6 @@ It also includes a custom CPU-based ray tracer for photorealistic offline render
 - CUDA-parallelized SPH simulation
 - Multithreaded CPU fallback mode
 - Real-time interactive OpenGL rendering
-- Offline CPU-based ray traced rendering
 - Adjustable fluid simulation parameters (e.g., viscosity, pressure)
 - Modular architecture for easy extension
 
