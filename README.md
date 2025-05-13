@@ -2,10 +2,10 @@
 
 **[→ View Project Repository](https://github.com/Praful-Joshi/Fluid-Simulation/tree/master)**
 
-This project is a real-time Smoothed Particle Hydrodynamics (SPH) fluid simulator implemented in C++ using OpenGL and accelerated with CUDA. It builds upon an existing CPU-only implementation by lijenicol and introduces GPU parallelism to significantly improve performance.
+This project is a parallelization of an SPH Fluid Solver using CUDA. It builds upon an existing CPU-only implementation by lijenicol and introduces GPU parallelism to significantly improve performance.
 
 <p align="center">
-  <img src="preview.gif" alt="Gameplay Preview" />
+  <img src="preview.gif" alt="Gameplay Preview" width="600" />
 </p>
 
 ---
